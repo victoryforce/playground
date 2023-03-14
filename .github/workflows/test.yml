@@ -53,7 +53,8 @@ jobs:
             ${{ matrix.compiler.packages }}
       - name: Install Base Dependencies
         run: |
-          sudo apt-get -y install \
+          sudo apt-get -y install eatmydata
+          sudo eatmydata apt-get -y install \
             build-essential \
             appstream-util \
             desktop-file-utils \
