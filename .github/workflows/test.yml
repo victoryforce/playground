@@ -12,96 +12,34 @@ permissions:
 
 jobs:
 
-  Linux:
-    name: Linux.${{ matrix.os.code }}.${{ matrix.compiler.compiler }}.${{ matrix.target }}.${{ matrix.btype }}.${{ matrix.generator }}
-    runs-on: ${{ matrix.os.label }}
-    strategy:
-      fail-fast: true
-      matrix:
-        os:
-          - { label: ubuntu-latest, code: latest }
-        compiler:
-          - { compiler: GNU10,  CC: gcc-10,   CXX: g++-10,     packages: gcc-10 g++-10 }
-        btype:
-          - Release
-        target:
-          - build
-          - nofeatures_nosse
-        generator:
-          #- Unix Makefiles
-          - Ninja
-    env:
-      CC: ${{ matrix.compiler.CC }}
-      CXX: ${{ matrix.compiler.CXX }}
-      SRC_DIR: ${{ github.workspace }}/src
-      BUILD_DIR: ${{ github.workspace }}/build
-      INSTALL_PREFIX: ${{ github.workspace }}/install
-      CMAKE_BUILD_TYPE: ${{ matrix.btype }}
-      GENERATOR: ${{ matrix.generator }}
-      TARGET: ${{ matrix.target }}
-      DARKTABLE_CLI: ${{ github.workspace }}/install/bin/darktable-cli
+  upload_to_release:
+    permissions:
+      # We need write permission to update the nightly tag
+      contents: write
+    runs-on: ubuntu-latest
     steps:
-      - name: Install compiler ${{ matrix.compiler.compiler }}
+      - name: Make some test file
         run: |
-          # Remove azure mirror because it is unreliable and sometimes unpredictably leads to failed CI
-          sudo sed -i 's/azure\.//' /etc/apt/sources.list
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-          sudo add-apt-repository -y universe
-          sudo add-apt-repository -y multiverse
-          sudo apt-get update
-          sudo eatmydata apt-get -y install \
-            ${{ matrix.compiler.packages }}
-      - name: Install Base Dependencies
-        run: |
-          sudo eatmydata apt-get -y install \
-            build-essential \
-            appstream-util \
-            desktop-file-utils \
-            gettext \
-            git \
-            gdb \
-            intltool \
-            libatk1.0-dev \
-            libavif-dev \
-            libcairo2-dev \
-            libcolord-dev \
-            libcolord-gtk-dev \
-            libcmocka-dev \
-            libcups2-dev \
-            libcurl4-gnutls-dev \
-            libexiv2-dev \
-            libgdk-pixbuf2.0-dev \
-            libglib2.0-dev \
-            libgmic-dev \
-            libgphoto2-dev \
-            libgraphicsmagick1-dev \
-            libgtk-3-dev \
-            libheif-dev \
-            libjpeg-dev \
-            libjson-glib-dev \
-            liblcms2-dev \
-            liblensfun-dev \
-            liblua5.4-dev \
-            libopenexr-dev \
-            libopenjp2-7-dev \
-            libosmgpsmap-1.0-dev \
-            libpango1.0-dev \
-            libpng-dev \
-            libportmidi-dev \
-            libpugixml-dev \
-            librsvg2-dev \
-            libsaxon-java \
-            libsdl2-dev \
-            libsecret-1-dev \
-            libsqlite3-dev \
-            libtiff5-dev \
-            libwebp-dev \
-            libx11-dev \
-            libxml2-dev \
-            libxml2-utils \
-            ninja-build \
-            perl \
-            po4a \
-            python3-jsonschema \
-            xsltproc \
-            zlib1g-dev;
+          echo "test string" > test-file-for-release.txt
+      - name: Update nightly release
+        uses: andelf/nightly-release@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: nightly
+          prerelease: true
+          name: 'Darktable Linux AppImage nightly build $$'
+          body: |
+            This is a nightly build of darktable in AppImage format.
+
+            You can use this if you want to try new features without waiting for releases.
+            From time to time, in development builds, old difficult-to-reproduce bugs are
+            fixed, but it is also true that in the development process with the introduction
+            of new complex code, the stability of the program may suffer compared to
+            official releases, **use it with caution**!
+
+            Also, new versions can make changes to the database schema, so it's best to run
+            them with a separate library.
+
+            Please help us improve darktable by reporting any issues you encounter. :wink:
+          files: test-file-for-release.txt
