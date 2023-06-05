@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Make some test file
         run: |
-          echo "test string" > test-file-for-release.txt
+          echo "test string 20230606" > test-file-for-release.txt
       - name: Update nightly release
         uses: andelf/nightly-release@main
         env:
@@ -43,3 +43,11 @@ jobs:
 
             Please help us improve darktable by reporting any issues you encounter. :wink:
           files: test-file-for-release.txt
+
+      - name: Delete nightly tag
+        uses: nbelingheri/delete-tag@v0.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: nightly
+
