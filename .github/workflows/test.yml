@@ -26,7 +26,6 @@ jobs:
           - Release
         target:
           - build
-          - nofeatures_nosse
         generator:
           #- Unix Makefiles
           - Ninja
