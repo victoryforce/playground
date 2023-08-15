@@ -28,7 +28,6 @@ jobs:
         target:
           - build
         generator:
-          #- Unix Makefiles
           - Ninja
     env:
       CC: ${{ matrix.compiler.CC }}
