@@ -1,0 +1,107 @@
+name: Linux buildenv test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  AppImage:
+    if: github.repository == 'darktable-org/darktable' || github.event_name == 'workflow_dispatch'
+    name: Nightly darktable AppImage
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler:
+          - { compiler: LLVM12, CC: clang-12, CXX: clang++-12, packages: clang-12 libomp-12-dev libclang-common-12-dev llvm-12-dev clang++-12 libc++-12-dev libc++1-12 libc++abi1-12 lld-12}
+        branch:
+          - { code: master, label: gitmaster }
+    env:
+      CC: ${{ matrix.compiler.CC }}
+      CXX: ${{ matrix.compiler.CXX }}
+      SRC_DIR: ${{ github.workspace }}/src
+      BUILD_DIR: ${{ github.workspace }}/build
+      INSTALL_PREFIX: ${{ github.workspace }}/AppDir/usr
+      CMAKE_BUILD_TYPE: ${{ matrix.btype }}
+      GENERATOR: ${{ matrix.generator }}
+      TARGET: ${{ matrix.target }}
+      DARKTABLE_CLI: ${{ github.workspace }}/AppDir/usr/bin/darktable-cli
+      BRANCH: ${{ matrix.branch.code }}
+      BUILD_NAME: ${{ matrix.branch.label }}
+    steps:
+      - name: Install compiler ${{ matrix.compiler.compiler }}
+        run: |
+          # Remove azure mirror because it is unreliable and sometimes unpredictably leads to failed CI
+          sudo sed -i 's/azure\.//' /etc/apt/sources.list
+          sudo apt-get update
+          sudo apt-get -y install \
+            ${{ matrix.compiler.packages }}
+      - name: Install Base Dependencies
+        run: |
+          sudo apt-get -y install \
+            build-essential \
+            appstream-util \
+            desktop-file-utils \
+            gettext \
+            git \
+            gdb \
+            intltool \
+            libatk1.0-dev \
+            libcairo2-dev \
+            libcolord-dev \
+            libcolord-gtk-dev \
+            libcmocka-dev \
+            libcups2-dev \
+            libcurl4-gnutls-dev \
+            libimage-exiftool-perl \
+            libgdk-pixbuf2.0-dev \
+            libglib2.0-dev \
+            libgraphicsmagick1-dev \
+            libgtk-3-dev \
+            libjpeg-dev \
+            libjson-glib-dev \
+            liblcms2-dev \
+            liblensfun-dev \
+            liblensfun-bin \
+            liblensfun-data-v1 \
+            liblensfun1 \
+            libopenjp2-7-dev \
+            libosmgpsmap-1.0-dev \
+            libpango1.0-dev \
+            libpng-dev \
+            libportmidi-dev \
+            libpugixml-dev \
+            librsvg2-dev \
+            libsaxon-java \
+            libsdl2-dev \
+            libsecret-1-dev \
+            libsqlite3-dev \
+            libtiff5-dev \
+            libwebp-dev \
+            libx11-dev \
+            libxml2-dev \
+            libxml2-utils \
+            ninja-build \
+            perl \
+            po4a \
+            python3-jsonschema \
+            xsltproc \
+            zlib1g-dev \
+            appstream;
+          sudo add-apt-repository -y ppa:savoury1/graphics
+          sudo add-apt-repository -y ppa:savoury1/ffmpeg4
+          sudo add-apt-repository -y ppa:savoury1/display
+          sudo apt-get update
+          sudo apt-get -y install \
+            libavif-dev \
+            libexiv2-dev \
+            libgmic-dev \
+            libgphoto2-dev \
+            libheif-dev \
+            libimath-dev \
+            libjxl-dev \
+            libopenexr-dev \
+            x11proto-dev \
+            libxfixes-dev;
