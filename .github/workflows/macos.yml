@@ -1,4 +1,4 @@
-name: Nightly PKG
+name: Prepare macOS build env
 
 on:
   workflow_dispatch:
