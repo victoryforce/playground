@@ -43,7 +43,7 @@ jobs:
       - name: Install compiler ${{ matrix.compiler.compiler }}
         run: |
           # Remove azure mirror because it is unreliable and sometimes unpredictably leads to failed CI
-          sudo sed -i 's/azure\.//' /etc/apt/sources.list
+          sudo sed -i 's/azure\.//' /etc/apt/apt-mirrors.txt
           sudo add-apt-repository ppa:ubuntu-toolchain-r/test
           sudo apt-get update
           sudo eatmydata apt-get -y install \
