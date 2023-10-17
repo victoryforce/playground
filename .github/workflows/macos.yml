@@ -7,6 +7,7 @@ permissions:
   contents: read
 
 jobs:
+  macOS:
     if: github.repository == 'darktable-org/darktable' || github.event_name == 'workflow_dispatch'
     name: Nightly darktable macOS
     runs-on: ${{ matrix.build.os }}
