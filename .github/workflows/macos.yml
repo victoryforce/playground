@@ -57,12 +57,3 @@ jobs:
       - name: use ImageMagick 6
         run: |
           brew link --overwrite --force imagemagick@6
-      - name: Cancel workflow if job fails
-        if: ${{ failure() }}
-        uses: andymckay/cancel-action@0.3
-      - name: Build and Install
-          # todo: use linker which supports --wrap, ld.bfd and ld.gold support it
-        run: |
-          cmake -E make_directory "${BUILD_DIR}";
-          cmake -E make_directory "${INSTALL_PREFIX}";
-          bash ./src/.ci/ci-script.sh;
